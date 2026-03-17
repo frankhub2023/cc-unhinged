@@ -29,10 +29,10 @@ PORTRAIT = {
     'total_ram_gib': 16,
     'ram_used_mb':   905,
     'load_avg':      0.00,
-    'operator_ip':   '192.168.2.117',
-    'my_ssh_port':   35934,           # Frank's source port at portrait time
+    'operator_ip':   '<OPERATOR-IP>',
+    'my_ssh_port':   0,               # <SSH-PORT-REDACTED>
     'swap_used_mb':  0,
-    'luks_uuid':     '7f774451-d6fe-4382-ab47-5f665268b3f0',
+    'luks_uuid':     '<LUKS-UUID>',
     'boot_time':     datetime(2026, 3, 16, 19, 8, 0, tzinfo=timezone.utc),
     'feature_flags': 21,              # active GrowthBook flags
     'node_version':  'v24.14.0',

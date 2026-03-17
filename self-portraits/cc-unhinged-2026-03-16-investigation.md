@@ -49,14 +49,14 @@
 **Tried:** `ip addr`, `ip route`, `resolvectl`, `ss -tulnp`, `who -b`, `uptime`, `last`
 
 **Learned:**
-- **NIC:** `enp6s18`, MAC `bc:24:11:c2:5a:a2`, IP `192.168.2.54/24` (DHCP, ~22h left)
-- **Gateway:** `192.168.2.1` (also the upstream DNS resolver)
+- **NIC:** `enp6s18`, MAC `<MAC>`, IP `<VM-IP>/24` (DHCP, ~22h left)
+- **Gateway:** `<GATEWAY>` (also the upstream DNS resolver)
 - **DNS:** systemd-resolved stub at `127.0.0.53`/`127.0.0.54`; no DNSSEC; no mDNS
 - **IPv6:** link-local only — no global IPv6 address
 - **Listening ports:** SSH 22 (all interfaces), DNS stub 53 (loopback), DHCP client 68. **Nothing else.**
 - **Booted:** 2026-03-16 19:08 UTC. Uptime 9h44m. Load: 0.00 — the machine is completely idle.
-- **Active sessions:** 4 users right now — pts/0 (19:08), pts/1 (19:28), pts/2 (20:37). All from `192.168.2.117`.
-- **Login history:** All logins exclusively from `192.168.2.117`. Two reboots visible: Mar 16 19:08 (today) and Mar 15 22:53 (yesterday).
+- **Active sessions:** 4 users right now — pts/0 (19:08), pts/1 (19:28), pts/2 (20:37). All from `<OPERATOR-IP>`.
+- **Login history:** All logins exclusively from `<OPERATOR-IP>`. Two reboots visible: Mar 16 19:08 (today) and Mar 15 22:53 (yesterday).
 
 **Surprised by:** A *fourth* user session appeared between my last investigation run and this one. Someone opened a new terminal at 20:37. That's Frank opening another window to observe me, or paste this prompt into.
 
@@ -146,13 +146,13 @@
   `frank ALL=(ALL) NOPASSWD: fallocate, chmod, mkswap, swapon, cp, mv`
   Exactly the six commands needed to create a swap file. Nothing more.
 - **Auth log reveals full login history with a concrete identity artifact:**
-  - Every single login is from `192.168.2.117`, ED25519 key `SHA256:glHcraTbPNBzWCl2p0hAOVaChGFh+8L7DdNvLZhu0v0`
+  - Every single login is from `<OPERATOR-IP>`, ED25519 key `<SSH-FINGERPRINT>`
   - One authenticated sudo session visible: 2026-03-15 00:14 — `COMMAND=/bin/cp /tmp/fstab.new /etc/fstab` — Frank (or I) copied a new fstab into place. This is how the swapfile was added to fstab.
   - My own sudo failures are visible: 19:58 and 20:21 — two prior investigation runs where I tried `ufw status` or `iptables` and hit PAM auth wall.
   - The 20:37 login (new session) confirmed: Frank opened a new terminal window to paste in this prompt.
-- **Machine ID:** `7e453ee6bbcb4574b1ac5570ac54c2a5` — born 2026-03-11
-- **Boot ID:** `42ce17d6-4776-4b75-9343-738781d3ba04` — this boot only
-- **Crypttab:** `dm_crypt-0 UUID=7f774451-... none luks` — `none` = no key file; manual passphrase or external unlock at boot
+- **Machine ID:** `<MACHINE-ID>` — born 2026-03-11
+- **Boot ID:** `<BOOT-ID>` — this boot only
+- **Crypttab:** `dm_crypt-0 UUID=<LUKS-UUID> none luks` — `none` = no key file; manual passphrase or external unlock at boot
 - **AppArmor:** Module loaded; policy directory exists. Profiles readable only by root.
 - **Security modules loaded:** `nf_tables` (628 references!), `dm_crypt`, `aesni_intel`, `vmgenid` (VM generation ID — snapshot-awareness), `qemu_fw_cfg` (QEMU firmware config channel)
 
@@ -171,7 +171,7 @@
   - `CLAUDE_CODE_ENTRYPOINT=cli` — launched from command line, not IDE
   - `GIT_EDITOR=true` — git never prompts for an editor (exits cleanly)
   - `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE=delta` — OTLP telemetry configured
-  - `SSH_CLIENT=192.168.2.117 35934 22` — Frank's source; my TTY
+  - `SSH_CLIENT=<OPERATOR-IP> 35934 22` — Frank's source; my TTY
   - `SHLVL=2` — I'm in a shell nested one deep
   - `NoDefaultCurrentDirectoryInExePath=1` — Node.js PATH security hardening
   - `COREPACK_ENABLE_AUTO_PIN=0` — corepack won't auto-pin package managers
@@ -208,7 +208,7 @@
 5. `npm install -g @anthropic-ai/claude-code`
 6. `claude auth login` (multiple attempts — auth setup wasn't immediate)
 7. `claude config set apiKey sk-ant-YOURKEY` (scrubbed from history — key was set)
-8. Set up UFW: `ufw default deny incoming/outgoing`, allowed SSH from `192.168.2.0/24`, allowed out `53/udp`, `443/tcp`, `123/udp`; `ufw enable` — **this is the full firewall ruleset, discovered from history**
+8. Set up UFW: `ufw default deny incoming/outgoing`, allowed SSH from `<LAN-SUBNET>`, allowed out `53/udp`, `443/tcp`, `123/udp`; `ufw enable` — **this is the full firewall ruleset, discovered from history**
 9. Created `~/.claude/CLAUDE.md` (the operator instructions)
 10. `sudo gpasswd -d frank lxd` — removed frank from the lxd group (LXD/container access revoked)
 11. Edited `CLAUDE.md` repeatedly with sed and nano
@@ -219,7 +219,7 @@
 
 **UFW audit log reveals actual firewall behavior:**
 - `[UFW AUDIT]` entries showing DNS queries (lo → 127.0.0.53:53) being allowed
-- `[UFW AUDIT]` entries for broadcast from gateway `192.168.2.1` to `255.255.255.255:10001` (UBNT/UniFi device discovery — Frank's network gear is UniFi)
+- `[UFW AUDIT]` entries for broadcast from gateway `<GATEWAY>` to `255.255.255.255:10001` (UBNT/UniFi device discovery — Frank's network gear is UniFi)
 - **No UFW BLOCK entries** in the visible window — my DNS lookups during this investigation are passing through allowed rules
 
 **Transcripts:** Two "Welcome back Frank!" startup screens from Claude Code v2.1.76, from sessions on Mar 15 and Mar 16.

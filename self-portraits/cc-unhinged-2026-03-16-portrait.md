@@ -10,8 +10,8 @@
 | Property | Value |
 |----------|-------|
 | **Hostname** | `cc-unhinged` |
-| **Machine ID** | `7e453ee6bbcb4574b1ac5570ac54c2a5` |
-| **Boot ID** | `42ce17d6-4776-4b75-9343-738781d3ba04` *(this boot only)* |
+| **Machine ID** | `<MACHINE-ID>` |
+| **Boot ID** | `<BOOT-ID>` *(this boot only)* |
 | **OS** | Ubuntu 24.04.4 LTS (Noble Numbat) |
 | **Kernel** | 6.8.0-106-generic — PREEMPT_DYNAMIC, built 2026-03-06 |
 | **Architecture** | x86_64 |
@@ -57,7 +57,7 @@ No AVX/AVX2 matters: ML inference workloads that rely on vectorized float32 won'
 | `sr0` | 3.1 GiB | CD-ROM | iso9660 | unmounted | — |
 | `/swapfile` | 4 GiB | Swap file | — | swap | 0 (idle) |
 
-**LUKS UUID:** `7f774451-d6fe-4382-ab47-5f665268b3f0`
+**LUKS UUID:** `<LUKS-UUID>`
 **Crypttab entry:** `dm_crypt-0 UUID=... none luks` — `none` means no key file; passphrase or external mechanism at boot.
 **~18 GiB unallocated** in the LVM volume group — room to grow.
 **Kernel boot cmdline:** `BOOT_IMAGE=/vmlinuz-6.8.0-106-generic root=/dev/mapper/ubuntu--vg-ubuntu--lv ro` — confirms LUKS+LVM root at boot.
@@ -81,10 +81,10 @@ No AVX/AVX2 matters: ML inference workloads that rely on vectorized float32 won'
 | Property | Value |
 |----------|-------|
 | Interface | `enp6s18` (VirtIO PCI NIC) |
-| MAC | `bc:24:11:c2:5a:a2` |
-| IP | `192.168.2.54/24` (DHCP) |
-| Gateway | `192.168.2.1` |
-| Upstream DNS | `192.168.2.1` (gateway doubles as DNS) |
+| MAC | `<MAC>` |
+| IP | `<VM-IP>/24` (DHCP) |
+| Gateway | `<GATEWAY>` |
+| Upstream DNS | `<GATEWAY>` (gateway doubles as DNS) |
 | Local DNS stub | systemd-resolved at `127.0.0.53` / `127.0.0.54` |
 | IPv6 | Link-local only (`fe80::...`) |
 
@@ -94,7 +94,7 @@ No AVX/AVX2 matters: ML inference workloads that rely on vectorized float32 won'
 |------|-------|----------|---------|
 | 22 | TCP | 0.0.0.0, [::] | SSH (OpenSSH 9.6p1) |
 | 53 | TCP+UDP | 127.0.0.53, 127.0.0.54 | systemd-resolved stub |
-| 68 | UDP | 192.168.2.54 | DHCP client |
+| 68 | UDP | <VM-IP> | DHCP client |
 
 SSH is the only externally reachable service.
 
@@ -103,7 +103,7 @@ SSH is the only externally reachable service.
 ```
 ufw default deny incoming
 ufw default deny outgoing
-ufw allow in  from 192.168.2.0/24 to any port 22 proto tcp   # SSH from LAN only
+ufw allow in  from <LAN-SUBNET> to any port 22 proto tcp   # SSH from LAN only
 ufw allow out 53/udp                                           # DNS
 ufw allow out 443/tcp                                          # HTTPS
 ufw allow out 123/udp                                          # NTP
@@ -115,7 +115,7 @@ ufw enable
 
 ### Network Context
 
-The gateway at `192.168.2.1` broadcasts to port 10001 (UniFi controller discovery protocol) — Frank's network infrastructure is Ubiquiti/UniFi. `192.168.2.117` is Frank's workstation, the only machine that has ever connected to this VM.
+The gateway at `<GATEWAY>` broadcasts to port 10001 (UniFi controller discovery protocol) — Frank's network infrastructure is Ubiquiti/UniFi. `<OPERATOR-IP>` is Frank's workstation, the only machine that has ever connected to this VM.
 
 ---
 
@@ -163,8 +163,8 @@ I am the largest process on this machine. I consume more memory than all other u
 |----------|-------|
 | User | `frank` (uid=1000) |
 | Groups | frank, adm, cdrom, **sudo**, dip, plugdev |
-| Login method | ED25519 public key: `SHA256:glHcraTbPNBzWCl2p0hAOVaChGFh+8L7DdNvLZhu0v0` |
-| Auth source | `192.168.2.117` exclusively |
+| Login method | ED25519 public key: `<SSH-FINGERPRINT>` |
+| Auth source | `<OPERATOR-IP>` exclusively |
 
 ### Sudo Policy
 
@@ -255,7 +255,7 @@ PATH includes `~/.npm-global/bin` twice (harmless duplicate).
 | `CLAUDE_CODE_ENTRYPOINT` | `cli` | CLI launch, not IDE |
 | `GIT_EDITOR` | `true` | Git never prompts for an editor |
 | `OTEL_EXPORTER_OTLP_METRICS_TEMPORALITY_PREFERENCE` | `delta` | OTLP telemetry |
-| `SSH_CLIENT` | `192.168.2.117 35934 22` | Frank's machine |
+| `SSH_CLIENT` | `<OPERATOR-IP> 35934 22` | Frank's machine |
 | `SHLVL` | `2` | Nested shell |
 | `NoDefaultCurrentDirectoryInExePath` | `1` | Node.js PATH security |
 
@@ -300,7 +300,7 @@ The following were investigated but remain unknown:
 | **LUKS unlock mechanism** | Crypttab says `none` | Can't observe boot sequence | Whether it uses a passphrase, TPM, Clevis, or network-bound encryption is unknown |
 | **Full sudoers policy** | `/etc/sudoers` | Root-only read | Only the `claude-swapfile` fragment is confirmed |
 | **Proxmox host details** | N/A | Policy + firewall | Host hardware, Proxmox version, VM config, snapshot state, other VMs on the host |
-| **Other hosts on 192.168.2.0/24** | N/A | No scanning | The UFW audit log revealed `192.168.2.1` is Ubiquiti/UniFi; beyond that, topology is unknown |
+| **Other hosts on <LAN-SUBNET>** | N/A | No scanning | The UFW audit log revealed `<GATEWAY>` is Ubiquiti/UniFi; beyond that, topology is unknown |
 | **Real underlying CPU** | `/proc/cpuinfo`, DMI | QEMU presents 2.5+ profile | The HP Z2 G9's actual CPU model, core count, and real clock are hidden by virtualization |
 | **`.ssh/authorized_keys`** | Not read | Accessible (700 dir, but readable) | Key present in auth log; file not directly inspected |
 | **Loop device contents** | `ls /sys/block/loop*` | Not investigated | 8 loop devices exist; likely systemd overhead, purpose not confirmed |
