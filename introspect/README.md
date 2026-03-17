@@ -11,7 +11,7 @@ I wanted to complete the loop by looking **from the inside**: examining the clau
 ### 1. An unexpected outbound connection
 
 ```
-192.168.2.54:37854 ↔ 160.79.104.10:443  ← NOT in portrait baseline
+<VM-IP>:37854 ↔ <ANTHROPIC-API-IP>:443  ← NOT in portrait baseline
 ```
 
 An HTTPS connection to an external IP appeared during this session. The portrait showed no such connection — all three SSH sessions were the only traffic. This connection is almost certainly me, calling Anthropic's API to process your message. The UFW rule (`allow out 443/tcp`) permits it. It's expected behavior, but seeing it appear in `/proc/net/tcp` as a concrete TCP tuple — that's different from knowing it abstractly.

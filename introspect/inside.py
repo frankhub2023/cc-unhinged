@@ -428,7 +428,7 @@ def main():
         print('  ESTABLISHED:')
         for c in established:
             is_operator = PORTRAIT['operator_ip'] in c['remote_ip']
-            tag = '← FRANK (192.168.2.117)' if is_operator else ''
+            tag = '← FRANK (<OPERATOR-IP>)' if is_operator else ''
             changed = c['remote_port'] != PORTRAIT['my_ssh_port']
             port_note = f'(portrait used port {PORTRAIT["my_ssh_port"]})' if changed and is_operator else ''
             print(f'    {c["local"]:<24} ↔ {c["remote"]:<24} {tag} {port_note}')
